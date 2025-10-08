@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import LayoutLogin from "../../components/atoms/layouts/layout-login";
 import FormInput from "../../components/molecules/form-input";
 import { useCallback } from "react";
-import { emailRules } from "../../validations/authRules";
+import { emailRules, passwordRules } from "../../validations/authRules";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -49,7 +49,7 @@ const Login = () => {
                 label="Password"
                 name="password"
                 control={control}
-                // rules={passwordRules}
+                rules={passwordRules}
                 placeholder="Masukkan password Anda"
                 type="password"
                 errors={errors.password}

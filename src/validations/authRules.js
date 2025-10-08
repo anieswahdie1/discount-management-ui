@@ -6,4 +6,8 @@ const emailRules = {
   },
 };
 
-export { emailRules };
+const passwordRules = {
+  required: "Password wajib diisi!",
+};
+
+export { emailRules, passwordRules };
