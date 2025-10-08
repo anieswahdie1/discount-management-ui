@@ -1,7 +1,14 @@
 import React from "react";
+import DefaultLayout from "../../components/organisms/default-layout";
 
 const Voucher = () => {
-  return <div>INDEX VOUCHER</div>;
+  return (
+    <>
+      <DefaultLayout>
+        <div>Voucher</div>
+      </DefaultLayout>
+    </>
+  );
 };
 
 export default Voucher;

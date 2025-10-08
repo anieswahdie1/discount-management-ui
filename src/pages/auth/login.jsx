@@ -4,10 +4,10 @@ import LayoutLogin from "../../components/atoms/layouts/layout-login";
 import FormInput from "../../components/molecules/form-input";
 import { useCallback, useState } from "react";
 import { emailRules, passwordRules } from "../../validations/authRules";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const [loadingBtn, setLoadingBtn] = useState(false);
 
@@ -22,11 +22,14 @@ const Login = () => {
     },
   });
 
-  const onSubmit = useCallback((payload) => {
-    console.log("payload: ", payload);
-    setLoadingBtn(true);
-    // navigate("/voucher");
-  }, []);
+  const onSubmit = useCallback(
+    (payload) => {
+      console.log("payload: ", payload);
+      setLoadingBtn(true);
+      navigate("/voucher");
+    },
+    [navigate]
+  );
 
   return (
     <div className="flex items-center justify-center min-h-screen">
