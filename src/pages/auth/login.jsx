@@ -2,12 +2,14 @@ import { Button } from "antd";
 import { useForm } from "react-hook-form";
 import LayoutLogin from "../../components/atoms/layouts/layout-login";
 import FormInput from "../../components/molecules/form-input";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { emailRules, passwordRules } from "../../validations/authRules";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+
+  const [loadingBtn, setLoadingBtn] = useState(false);
 
   const {
     control,
@@ -20,13 +22,11 @@ const Login = () => {
     },
   });
 
-  const onSubmit = useCallback(
-    (payload) => {
-      console.log("payload: ", payload);
-      navigate("/voucher");
-    },
-    [navigate]
-  );
+  const onSubmit = useCallback((payload) => {
+    console.log("payload: ", payload);
+    setLoadingBtn(true);
+    // navigate("/voucher");
+  }, []);
 
   return (
     <div className="flex items-center justify-center min-h-screen">
@@ -55,7 +55,12 @@ const Login = () => {
                 errors={errors.password}
               />
             </div>
-            <Button size="large" type="primary" htmlType="submit">
+            <Button
+              size="large"
+              type="primary"
+              htmlType="submit"
+              loading={loadingBtn}
+            >
               Masuk
             </Button>
           </div>
