@@ -5,6 +5,8 @@ import { useCallback, useMemo, useState } from "react";
 import useDrawer from "../../../stores/useDrawer";
 import useAuth from "../../../stores/useAuth";
 import authApi from "../../../apis/auth.api";
+import FailedAlerts from "../../atoms/alerts/failed";
+import SuccessAlert from "../../atoms/alerts/success";
 
 const NavbarMenu = () => {
   const navigate = useNavigate();
@@ -27,14 +29,16 @@ const NavbarMenu = () => {
   }, []);
 
   const onClickLogout = useCallback(async () => {
-    const { success } = await authApi.logout();
+    const { success, data } = await authApi.logout();
 
     if (success) {
       setDrawerMenuFalse();
       navigate("/");
       setLogout();
+      SuccessAlert("Logout berhasil");
       return;
     }
+    FailedAlerts(data);
   }, [navigate, setDrawerMenuFalse, setLogout]);
 
   const isMenuSelected = useMemo(() => {

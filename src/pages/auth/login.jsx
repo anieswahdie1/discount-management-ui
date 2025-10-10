@@ -7,6 +7,8 @@ import { emailRules, passwordRules } from "../../validations/authRules";
 import { useNavigate } from "react-router-dom";
 import authApi from "../../apis/auth.api";
 import useAuth from "../../stores/useAuth";
+import FailedAlerts from "../../components/atoms/alerts/failed";
+import SuccessAlert from "../../components/atoms/alerts/success";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -36,8 +38,11 @@ const Login = () => {
         setLoadingBtn(false);
         navigate("/voucher");
         setAuthorizeTrue(data);
+        SuccessAlert("Login Berhasil");
         return;
       }
+      FailedAlerts(data);
+      setLoadingBtn(false);
     },
     [navigate, setAuthorizeTrue]
   );
