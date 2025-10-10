@@ -28,6 +28,7 @@ const addNewVoucher = async (payload) => {
     success: false,
     data: undefined,
     code: undefined,
+    message: undefined,
   };
 
   try {
@@ -37,6 +38,7 @@ const addNewVoucher = async (payload) => {
       result.success = true;
       result.data = res?.data?.data;
       result.code = res?.status;
+      result.message = res?.data?.message;
     }
   } catch (error) {
     result.success = error?.response?.data?.success;
@@ -56,7 +58,6 @@ const deleteVoucher = async (id) => {
 
   try {
     const res = await axiosInstance.delete("/vouchers/" + id);
-    console.log("res: ", res);
     if (res?.status === 200) {
       result.success = true;
       result.data = res?.data?.message;
@@ -76,15 +77,16 @@ const editVoucher = async (id, payload) => {
     success: false,
     data: undefined,
     code: undefined,
+    message: undefined,
   };
 
   try {
     const res = await axiosInstance.put("/vouchers/" + id, payload);
-
     if (res?.status === 201 || res?.status === 200) {
       result.success = true;
       result.data = res?.data?.data;
       result.code = res?.status;
+      result.message = res?.data?.message;
     }
   } catch (error) {
     result.success = error?.response?.data?.success;

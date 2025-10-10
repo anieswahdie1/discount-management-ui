@@ -97,7 +97,7 @@ const Voucher = () => {
       if (response?.success) {
         navigate("/voucher");
         getList();
-        SuccessAlert("Data voucher berhasil ditambahkan!");
+        SuccessAlert(response?.message);
         return;
       }
       FailedAlerts(response?.data);
