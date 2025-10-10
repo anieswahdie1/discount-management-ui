@@ -2,15 +2,16 @@ import DefaultDrawer from "../../atoms/default-drawer";
 import useDrawer from "../../../stores/useDrawer";
 import FormInput from "../form-input";
 import { useForm } from "react-hook-form";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { Button } from "antd";
 import {
   discRules,
   expiryDateRules,
   voucherCodeRules,
 } from "../../../validations/addVoucherRules";
+import dayjs from "dayjs";
 
-const DrawerForm = ({ saveData }) => {
+const DrawerForm = ({ saveData, selectedData }) => {
   const isDrawerFormOpen = useDrawer((state) => state.isDrawerFormOpen);
   const { setIsDrawerFormOpenClose } = useDrawer((state) => state);
 
@@ -29,16 +30,38 @@ const DrawerForm = ({ saveData }) => {
 
   const onSubmit = useCallback(
     (payload) => {
-      saveData(payload);
+      const dataToSave = {
+        code: payload.code,
+        discount: payload.discount,
+        expiry: payload.expiry,
+      };
+
+      saveData(dataToSave, selectedData);
       setIsDrawerFormOpenClose();
     },
-    [saveData, setIsDrawerFormOpenClose]
+    [saveData, selectedData, setIsDrawerFormOpenClose]
   );
 
   const handleCancel = useCallback(() => {
     reset();
     setIsDrawerFormOpenClose();
   }, [reset, setIsDrawerFormOpenClose]);
+
+  useEffect(() => {
+    if (selectedData) {
+      reset({
+        code: selectedData.code || "",
+        discount: selectedData.discount || "",
+        expiry: selectedData.expiry ? dayjs(selectedData?.expiry) : "",
+      });
+    } else {
+      reset({
+        code: "",
+        discount: "",
+        expiry: null,
+      });
+    }
+  }, [reset, selectedData]);
 
   return (
     <DefaultDrawer

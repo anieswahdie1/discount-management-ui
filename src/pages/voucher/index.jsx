@@ -23,6 +23,7 @@ const Voucher = () => {
 
   const [isModalDetailData, setIsModalDetailData] = useState(false);
   const [selectedDataView, setSelectedDataView] = useState(null);
+  const [selectedDataEdit, setSelectedDataEdit] = useState(undefined);
 
   const columns = useMemo(() => {
     const cols = [
@@ -73,25 +74,33 @@ const Voucher = () => {
   }, [getList]);
 
   const onClickAddVoucher = useCallback(() => {
+    setSelectedDataEdit(undefined);
     setIsDrawerFormOpen();
   }, [setIsDrawerFormOpen]);
 
   const onClickSave = useCallback(
-    async (body) => {
+    async (body, selectedData) => {
       const payload = {
         code: body?.code,
         discount: Number(body?.discount),
         expiry: body?.expiry.format("YYYY-MM-DD"),
       };
 
-      const { success, data } = await voucherApi.addNewVoucher(payload);
-      if (success) {
+      let response;
+      if (selectedData) {
+        // mode edit
+        response = await voucherApi.editVoucher(selectedData?.id, payload);
+      } else {
+        response = await voucherApi.addNewVoucher(payload);
+      }
+
+      if (response?.success) {
         navigate("/voucher");
         getList();
         SuccessAlert("Data voucher berhasil ditambahkan!");
         return;
       }
-      FailedAlerts(data);
+      FailedAlerts(response?.data);
     },
     [getList, navigate]
   );
@@ -120,6 +129,14 @@ const Voucher = () => {
     setIsModalDetailData(true);
   }, []);
 
+  const onClickUpdate = useCallback(
+    (el) => {
+      setSelectedDataEdit(el);
+      setIsDrawerFormOpen();
+    },
+    [setIsDrawerFormOpen]
+  );
+
   const dataSource = useMemo(() => {
     if (listData.length === 0) return [];
 
@@ -136,7 +153,7 @@ const Voucher = () => {
               color="#2e5b36"
               className="cursor-pointer"
               onClick={() => {
-                console.log(el);
+                onClickUpdate(el);
               }}
             />
 
@@ -162,7 +179,7 @@ const Voucher = () => {
       };
     });
     return list;
-  }, [listData, onClickDelete, viewDetail]);
+  }, [listData, onClickDelete, onClickUpdate, viewDetail]);
 
   return (
     <>
@@ -183,7 +200,7 @@ const Voucher = () => {
           </div>
         </div>
       </DefaultLayout>
-      <DrawerForm saveData={onClickSave} />
+      <DrawerForm saveData={onClickSave} selectedData={selectedDataEdit} />
       <ModalConfirmation
         openModal={isModalDelete}
         actionCancel={() => {
