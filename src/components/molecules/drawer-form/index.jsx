@@ -30,7 +30,6 @@ const DrawerForm = ({ saveData }) => {
   const onSubmit = useCallback(
     (payload) => {
       saveData(payload);
-
       setIsDrawerFormOpenClose();
     },
     [saveData, setIsDrawerFormOpenClose]

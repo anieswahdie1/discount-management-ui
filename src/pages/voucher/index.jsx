@@ -1,44 +1,22 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import DefaultLayout from "../../components/organisms/default-layout";
 import { Button, Input, Table } from "antd";
 import useDrawer from "../../stores/useDrawer";
 import DrawerForm from "../../components/molecules/drawer-form";
+import voucherApi from "../../apis/voucher.api";
+import { useNavigate } from "react-router-dom";
+import { faEdit, faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ModalConfirmation from "../../components/atoms/modals";
 
 const Voucher = () => {
+  const navigate = useNavigate();
+
   const { setIsDrawerFormOpen } = useDrawer((state) => state);
 
-  const [listData, setListData] = useState([
-    {
-      no: 1,
-      code: "VOC001",
-      discount: 10,
-      expiry: "10 Oktober 2025",
-    },
-    {
-      no: 2,
-      code: "VOC001",
-      discount: 10,
-      expiry: "10 Oktober 2025",
-    },
-    {
-      no: 3,
-      code: "VOC001",
-      discount: 10,
-      expiry: "10 Oktober 2025",
-    },
-    {
-      no: 4,
-      code: "VOC001",
-      discount: 10,
-      expiry: "10 Oktober 2025",
-    },
-    {
-      no: 5,
-      code: "VOC001",
-      discount: 10,
-      expiry: "10 Oktober 2025",
-    },
-  ]);
+  const [listData, setListData] = useState([]);
+  const [isModalDelete, setIsModalDelete] = useState(false);
+  const [idDelete, setIdDelete] = useState(null);
 
   const columns = useMemo(() => {
     const cols = [
@@ -62,26 +40,121 @@ const Voucher = () => {
         dataIndex: "expiry",
         key: "expiry",
       },
+      {
+        title: "Aksi",
+        dataIndex: "aksi",
+        key: "aksi",
+        fixed: "right",
+        render: (aksi) => aksi,
+      },
     ];
 
     return cols;
   }, []);
+
+  const getList = useCallback(async (updatedData) => {
+    if (updatedData) {
+      setListData((prev) => [...prev, ...updatedData]);
+      return;
+    }
+
+    const { success, data } = await voucherApi.getListVoucher();
+
+    if (success) {
+      setListData(data?.vouchers);
+      return;
+    }
+    setListData([]);
+  }, []);
+
+  useEffect(() => {
+    getList();
+  }, [getList]);
 
   const onClickAddVoucher = useCallback(() => {
     setIsDrawerFormOpen();
   }, [setIsDrawerFormOpen]);
 
   const onClickSave = useCallback(
-    (body) => {
-      listData.push({
-        no: 6,
-        ...body,
-      });
+    async (body) => {
+      const payload = {
+        code: body?.code,
+        discount: Number(body?.discount),
+        expiry: body?.expiry.format("YYYY-MM-DD"),
+      };
 
-      setListData(listData);
+      const { success, data } = await voucherApi.addNewVoucher(payload);
+      if (success) {
+        navigate("/voucher");
+        getList(data);
+        return;
+      }
     },
-    [listData]
+    [getList, navigate]
   );
+
+  const onClickDelete = useCallback((el) => {
+    setIdDelete(el?.id);
+    setIsModalDelete(true);
+  }, []);
+
+  const actionDeleteData = useCallback(async () => {
+    const { success, data } = await voucherApi.deleteVoucher(idDelete);
+
+    console.log("data: ", data);
+
+    if (success) {
+      setIsModalDelete(false);
+      setIdDelete(null);
+      getList();
+      return;
+    }
+    return;
+  }, [getList, idDelete]);
+
+  const dataSource = useMemo(() => {
+    if (listData.length === 0) return [];
+
+    const list = listData.map((el, idx) => {
+      return {
+        no: idx + 1,
+        code: el?.code,
+        discount: el?.discount,
+        expiry: el?.expiry,
+        aksi: (
+          <div className="flex flex-row gap-1">
+            <FontAwesomeIcon
+              icon={faEdit}
+              color="#2e5b36"
+              className="cursor-pointer"
+              onClick={() => {
+                console.log(el);
+              }}
+            />
+
+            <FontAwesomeIcon
+              icon={faTrash}
+              color="red"
+              className="cursor-pointer"
+              onClick={() => {
+                onClickDelete(el);
+              }}
+            />
+
+            <FontAwesomeIcon
+              icon={faEye}
+              color="#2e5b36"
+              className="cursor-pointer"
+              // onClick={() => {
+              //   actionOpenModalViewDetail(el);
+              // }}
+            />
+          </div>
+        ),
+      };
+    });
+    return list;
+  }, [listData, onClickDelete]);
 
   return (
     <>
@@ -98,11 +171,21 @@ const Voucher = () => {
             </Button>
           </div>
           <div className="overflow-x-auto">
-            <Table dataSource={listData} columns={columns} pagination={false} />
+            <Table dataSource={dataSource} columns={columns} />
           </div>
         </div>
       </DefaultLayout>
       <DrawerForm saveData={onClickSave} />
+      <ModalConfirmation
+        openModal={isModalDelete}
+        actionCancel={() => {
+          setIsModalDelete(false);
+          setIdDelete(null);
+        }}
+        actionOk={actionDeleteData}
+        title={"Konfirmasi Hapus Data"}
+        text={"Apakah Anda yakin akan menghapus data ini?"}
+      />
     </>
   );
 };

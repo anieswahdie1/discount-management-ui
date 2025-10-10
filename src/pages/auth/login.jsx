@@ -5,11 +5,15 @@ import FormInput from "../../components/molecules/form-input";
 import { useCallback, useState } from "react";
 import { emailRules, passwordRules } from "../../validations/authRules";
 import { useNavigate } from "react-router-dom";
+import authApi from "../../apis/auth.api";
+import useAuth from "../../stores/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
 
   const [loadingBtn, setLoadingBtn] = useState(false);
+
+  const { setAuthorizeTrue } = useAuth((state) => state);
 
   const {
     control,
@@ -23,12 +27,19 @@ const Login = () => {
   });
 
   const onSubmit = useCallback(
-    (payload) => {
-      console.log("payload: ", payload);
+    async (payload) => {
       setLoadingBtn(true);
-      navigate("/voucher");
+
+      const { data, success } = await authApi.login(payload);
+
+      if (success) {
+        setLoadingBtn(false);
+        navigate("/voucher");
+        setAuthorizeTrue(data);
+        return;
+      }
     },
-    [navigate]
+    [navigate, setAuthorizeTrue]
   );
 
   return (

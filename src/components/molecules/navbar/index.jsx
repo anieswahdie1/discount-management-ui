@@ -3,12 +3,15 @@ import DrawerMenu from "../../atoms/drawer/drawer-menu";
 import { useNavigate } from "react-router-dom";
 import { useCallback, useMemo, useState } from "react";
 import useDrawer from "../../../stores/useDrawer";
+import useAuth from "../../../stores/useAuth";
+import authApi from "../../../apis/auth.api";
 
 const NavbarMenu = () => {
   const navigate = useNavigate();
 
   const [selectedMenu, setSelectedMenu] = useState(false);
 
+  const { setLogout } = useAuth((state) => state);
   const { setDrawerMenuFalse } = useDrawer((state) => state);
   const isMenuActive = useDrawer((state) => state.isMenuActive);
 
@@ -23,10 +26,16 @@ const NavbarMenu = () => {
     return list;
   }, []);
 
-  const onClickLogout = useCallback(() => {
-    setDrawerMenuFalse();
-    navigate("/");
-  }, [navigate, setDrawerMenuFalse]);
+  const onClickLogout = useCallback(async () => {
+    const { success } = await authApi.logout();
+
+    if (success) {
+      setDrawerMenuFalse();
+      navigate("/");
+      setLogout();
+      return;
+    }
+  }, [navigate, setDrawerMenuFalse, setLogout]);
 
   const isMenuSelected = useMemo(() => {
     if (selectedMenu) {
