@@ -1,4 +1,4 @@
-import { Input } from "antd";
+import { DatePicker, Input } from "antd";
 import { Controller } from "react-hook-form";
 
 const FormInput = ({
@@ -20,6 +20,13 @@ const FormInput = ({
         render={({ field }) =>
           type === "password" ? (
             <Input.Password
+              {...field}
+              size="large"
+              placeholder={placeholder}
+              status={errors ? "error" : ""}
+            />
+          ) : type === "date" ? (
+            <DatePicker
               {...field}
               size="large"
               placeholder={placeholder}
